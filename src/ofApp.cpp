@@ -60,7 +60,8 @@ void ofApp::draw(){
     cam.end();
     ofDisableDepthTest();
     
-    //TODO: add lighting with gui interaction.
+    /*TODO: Add lighting with gui interaction. Add mechanic whereby color is manipulated on the basis of height.
+     Scale noise values. Allow export to obj file. Add shader functionality? */
 }
 
 //--------------------------------------------------------------
