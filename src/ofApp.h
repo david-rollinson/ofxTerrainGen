@@ -20,7 +20,10 @@ class ofApp : public ofBaseApp{
 		void windowResized(int w, int h);
 		void dragEvent(ofDragInfo dragInfo);
 		void gotMessage(ofMessage msg);
+    
+        float noiseCoords(float _x, float _y, float _z);
 		
     ofPlanePrimitive terrain;
     ofEasyCam cam;
+
 };
