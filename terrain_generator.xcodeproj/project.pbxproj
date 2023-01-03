@@ -1567,6 +1567,7 @@ fi
 					<array>
 						<string>$(OF_CORE_HEADERS)</string>
 						<string>src</string>
+						<string>src</string>
 						<string>../../../addons/ofxAssimpModelLoader/libs</string>
 						<string>../../../addons/ofxAssimpModelLoader/libs/assimp</string>
 						<string>../../../addons/ofxAssimpModelLoader/libs/assimp/include</string>
@@ -1620,6 +1621,7 @@ fi
 					<key>HEADER_SEARCH_PATHS</key>
 					<array>
 						<string>$(OF_CORE_HEADERS)</string>
+						<string>src</string>
 						<string>src</string>
 						<string>../../../addons/ofxAssimpModelLoader/libs</string>
 						<string>../../../addons/ofxAssimpModelLoader/libs/assimp</string>
@@ -4438,6 +4440,7 @@ fi
 					<array>
 						<string>$(OF_CORE_HEADERS)</string>
 						<string>src</string>
+						<string>src</string>
 						<string>../../../addons/ofxAssimpModelLoader/libs</string>
 						<string>../../../addons/ofxAssimpModelLoader/libs/assimp</string>
 						<string>../../../addons/ofxAssimpModelLoader/libs/assimp/include</string>
@@ -4511,6 +4514,7 @@ fi
 					<key>HEADER_SEARCH_PATHS</key>
 					<array>
 						<string>$(OF_CORE_HEADERS)</string>
+						<string>src</string>
 						<string>src</string>
 						<string>../../../addons/ofxAssimpModelLoader/libs</string>
 						<string>../../../addons/ofxAssimpModelLoader/libs/assimp</string>
@@ -4663,6 +4667,7 @@ fi
 					<array>
 						<string>$(OF_CORE_HEADERS)</string>
 						<string>src</string>
+						<string>src</string>
 						<string>../../../addons/ofxAssimpModelLoader/libs</string>
 						<string>../../../addons/ofxAssimpModelLoader/libs/assimp</string>
 						<string>../../../addons/ofxAssimpModelLoader/libs/assimp/include</string>
@@ -4728,6 +4733,7 @@ fi
 					<key>HEADER_SEARCH_PATHS</key>
 					<array>
 						<string>$(OF_CORE_HEADERS)</string>
+						<string>src</string>
 						<string>src</string>
 						<string>../../../addons/ofxAssimpModelLoader/libs</string>
 						<string>../../../addons/ofxAssimpModelLoader/libs/assimp</string>

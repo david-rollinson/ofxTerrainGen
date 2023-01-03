@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ofMain.h"
+#include "ofxGui.h"
 
 class ofApp : public ofBaseApp{
 
@@ -25,5 +26,12 @@ class ofApp : public ofBaseApp{
 		
     ofPlanePrimitive terrain;
     ofEasyCam cam;
-
+    
+    ofxPanel gui;
+    ofxFloatSlider amplitude;
+    ofxToggle iterateNoise;
+    ofxIntSlider cols_rows;
+    ofxFloatSlider size;
+    
+    int frameNum;
 };
