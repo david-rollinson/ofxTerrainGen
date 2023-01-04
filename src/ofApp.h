@@ -22,8 +22,12 @@ class ofApp : public ofBaseApp{
 		void dragEvent(ofDragInfo dragInfo);
 		void gotMessage(ofMessage msg);
     
-        float noiseCoords(float _x, float _y, float _z);
+    //CUSTOM METHODS.
+    float noiseCoords(float _x, float _y, float _z);
+    void restoreCamera();
+    void toggleDrawMode();
 		
+    //CUSTOM VARIABLES.
     ofPlanePrimitive terrain;
     ofEasyCam cam;
     
@@ -32,6 +36,15 @@ class ofApp : public ofBaseApp{
     ofxToggle iterateNoise;
     ofxIntSlider cols_rows;
     ofxFloatSlider size;
+    ofxButton restoreCam;
+    ofxButton drawMode;
     
     int frameNum;
+    
+    //DECLARE STATE MACHINE
+    typedef enum {
+    wireFrame,
+    solidFill
+    } State;
+    State drawType;
 };
