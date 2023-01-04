@@ -29,6 +29,7 @@ class ofApp : public ofBaseApp{
 		
     //CUSTOM VARIABLES.
     ofPlanePrimitive terrain;
+    ofMesh * terPtr;
     ofEasyCam cam;
     
     ofxPanel gui;
@@ -36,6 +37,12 @@ class ofApp : public ofBaseApp{
     ofxToggle iterateNoise;
     ofxIntSlider cols_rows;
     ofxFloatSlider size;
+    ofxFloatSlider iterationSpeed;
+    
+    ofxFloatSlider waterHeight;
+    ofxFloatSlider landHeight;
+    
+    //TOGGLES.
     ofxButton restoreCam;
     ofxButton drawMode;
     
@@ -44,7 +51,10 @@ class ofApp : public ofBaseApp{
     //DECLARE STATE MACHINE
     typedef enum {
     wireFrame,
-    solidFill
+    solidFill,
+    verticesOnly
     } State;
     State drawType;
+    int transition = 0;
+    int result = 0;
 };
