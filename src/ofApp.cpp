@@ -2,7 +2,6 @@
 
 //--------------------------------------------------------------
 void ofApp::setup(){
-    
     //RENDER PRELIMS.
     ofSetWindowTitle("Terrain Generator");
     ofBackground(0,0,0);
@@ -16,28 +15,44 @@ void ofApp::setup(){
     
     //MESH SETUP.
     ofSetColor(255, 0, 0);
-    terrain.set(100,100,10,10,OF_PRIMITIVE_TRIANGLE_STRIP);
+    terrain.set(100,100,10,10,OF_PRIMITIVE_POINTS);
     terPtr = terrain.getMeshPtr();
     
     //CAMERA SETUP.
-    cam.setPosition(0, 0, -100);
-    cam.lookAt(terrain);
+    restoreCamera();
+    
+    //LIGHTS SETUP.
+    point1.setPointLight();
     
     //GUI SETUP.
     gui.setup();
-    gui.add(amplitude.setup("Amplitude", 20, 0, 500));
-    gui.add(cols_rows.setup("Cols/Rows", 10, 1, 1000));
-    gui.add(size.setup("Size", 100, 10, 4000));
-    gui.add(iterateNoise.setup("Iterate", false));
+    gui.add(amplitude.setup("Amplitude", 75, 0, 500));
+    gui.add(size.setup("Size", 500, 10, 4000));
+    gui.add(cols_rows.setup("Cols/Rows", 100, 1, 1000));
+    gui.add(waterHeight.setup("Water Height", 25, 100, 0));
+    gui.add(landHeight.setup("Land Height", -25, 0, -100));
     gui.add(iterationSpeed.setup("Speed", 0.001, 0.00001, 0.002));
-    gui.add(waterHeight.setup("Water Height", 0, -1, 0));
-    gui.add(landHeight.setup("Land Height", 1, 1, 0));
-    //BUTTON SETUP.
+    gui.add(iterateNoise.setup("Iterate", false));
+    
+    //DRAW MODE TOGGLE.
+    drawMode.addListener(this, &ofApp::toggleDrawMode);
+    gui.add(drawMode.setup("Toggle Draw Mode"));
+    
+    //LIGHT MODES.
+    gui.add(lightPos.set("Light Position",ofVec3f(0,0,300), ofVec3f(-300,-300,-300), ofVec3f(300,300,300)));
+    
+    //COLOR MODES.
+    gui.add(waterCol.setup("Water Color",ofColor(0, 0, 240), ofColor(0, 0), ofColor(255, 255)));
+    gui.add(landCol.setup("Land Color",ofColor(0, 160, 0), ofColor(0, 0), ofColor(255, 255)));
+    gui.add(peakCol.setup("Peak Color",ofColor(255, 255, 215), ofColor(0, 0), ofColor(255, 255)));
+    
+    //CAMERA CONTROL.
     restoreCam.addListener(this, &ofApp::restoreCamera); //reference function as event listener.
     gui.add(restoreCam.setup("Reset Camera Position"));
     
-    drawMode.addListener(this, &ofApp::toggleDrawMode);
-    gui.add(drawMode.setup("Toggle Draw Mode"));
+    //SAVE MESH.
+    saveMesh.addListener(this, &ofApp::exportMesh);
+    gui.add(saveMesh.setup("Export Mesh as .OBJ"));
     
     //use a custom value instead of innate frame num of the sketch - allows for "play and pause" style interaction.
     frameNum = 0;
@@ -45,7 +60,9 @@ void ofApp::setup(){
 
 //--------------------------------------------------------------
 void ofApp::update(){
-    
+    //Update the light position and set direction.
+    point1.setPosition(lightPos->x, lightPos->y, lightPos->z);
+    point1.lookAt(terrain);
 }
 
 //--------------------------------------------------------------
@@ -53,49 +70,78 @@ void ofApp::draw(){
     //Turns on depth testing so rendering happens according to z-depth rather than draw order.
     ofEnableDepthTest();
     cam.begin();
+    point1.enable();
+    if(savingMesh == false){
     
-    if(iterateNoise){
-        frameNum ++;
-    }
+    //DRAW ENTIRE MESH -------------------------------------
     
-    //Calculate new z values for mesh.
-    for(int i = 0; i < terPtr->getVertices().size(); i++) {
-        terPtr->addColor(ofColor(255)); //add a colour value that we can then manipulate according to the z noise value.
-        terPtr->getVertices()[i].z = (amplitude*noiseCoords(terPtr->getVertices()[i].x, terPtr->getVertices()[i].y, frameNum*iterationSpeed)) - 1.5*amplitude;
-        //std::cout << "value: " << terPtr->getVertices()[i].x << endl; //use this to check that vertices are being altered accordingly.
-        if(terPtr->getVertices()[i].z > waterHeight) { //careful with operators here - z values increase away from the camera.
-            terPtr->setColor(i, ofFloatColor(0,0,255));
-        } else if(terPtr->getVertices()[i].z <= waterHeight) {
-            terPtr->setColor(i, ofFloatColor(0,255,0));
+    if(iterateNoise){ frameNum ++; }
+    
+        //Calculate new z values for mesh.
+        for(int i = 0; i < terPtr->getVertices().size(); i++) {
+            terPtr->addColor(ofColor(255)); //add a colour value that we can then manipulate according to the z noise value.
+            terPtr->getVertices()[i].z = (amplitude*noiseCoords(terPtr->getVertices()[i].x, terPtr->getVertices()[i].y, frameNum*iterationSpeed)) - 1.5*amplitude;
+            //std::cout << "value: " << terPtr->getVertices()[i][2] << endl; //use this to check that vertices are being altered accordingly.
+            if(terPtr->getVertices()[i].z > waterHeight) { //careful with operators here - z values increase away from the camera.
+                terPtr->setColor(i, ofColor(waterCol));
+            } else if(terPtr->getVertices()[i].z <= waterHeight && terPtr->getVertices()[i].z >= landHeight) {
+                terPtr->setColor(i, ofColor(landCol));
+            } else {
+                terPtr->setColor(i, ofColor(peakCol));
+            }
         }
-    }
+        
+        //Set draw type, size and resolution.
+        switch(drawType) {
+            case wireFrame:
+                terrain.drawWireframe();
+                break;
+            case solidFill:
+                terrain.draw();
+                break;
+            case verticesOnly:
+                terrain.drawVertices();
+                break;
+        }
+        terrain.setResolution(cols_rows, cols_rows);
+        terrain.set(size,size);
     
-    //Set draw type, size and resolution.
-    switch(drawType) {
-        case wireFrame:
-            terrain.drawWireframe();
-            break;
-        case solidFill:
-            terrain.draw();
-            break;
-        case verticesOnly:
-            terrain.drawVertices();
-            break;
+    } else if (savingMesh == true){
+        iterateNoise = false;
+        
+        //EXPORT TO OBJ FILE -----------------------------------
+        
+        string file_name = "test_" + ofGetTimestampString();
+        ofFile obj(ofToDataPath(file_name + ".obj"), ofFile::WriteOnly); // creates a new file distinguishable by its time stamp.
+        obj.create();
+        obj.open("/Users/davidrollinson/Documents/Development/OF_ROOT/apps/myApps/terrain_generator/bin/data/" + file_name + ".obj", ofFile::WriteOnly);
+        obj << "#vertices:\n";
+            for(int i = 0 ; i < terPtr->getVertices().size(); i++) {
+                obj << "v " << terPtr->getVertices()[i].x << " " << terPtr->getVertices()[i].y << " " << (amplitude*noiseCoords(terPtr->getVertices()[i].x, terPtr->getVertices()[i].y, frameNum*iterationSpeed)) - 1.5*amplitude << endl; //noise value must be used here in order to export without all z values reading as 0.
+            }
+            obj << "#faces:\n";
+            for(int i = 0 ; i < terPtr->getIndices().size() / 3; i ++)
+                obj << "f " << terPtr->getIndex(i*3) + 1 << " " << terPtr->getIndex(i*3+1) + 1 << " " << terPtr->getIndex(i*3+2) + 1 << endl; //objs start indexing at 1 so add 1 to all indices values.
+            obj << "\n";
+        obj.close();
+        savingMesh = false;
+        cout << "Saving Mesh - False " << endl;
     }
-    terrain.setResolution(cols_rows, cols_rows);
-    terrain.set(size,size);
 
     cam.end();
+//    point1.disable(); //this isn't necessary in this case.
     ofDisableDepthTest();
+    
+    glDisable(GL_LIGHTING); //Disable all lighting before drawing the gui.
     gui.draw();
-    /*TODO: Add lighting with gui interaction.
-      Allow export to obj file. Add shader functionality? */
+    glEnable(GL_LIGHTING); //Re-enable before redrawing the canvas.
+    
+    /*TODO: Add shader functionality? */
 }
 
 //--------------------------------------------------------------
 //GATHER NOISE VALS.
 float ofApp::noiseCoords(float _x, float _y, float _z){
-    
     //NOISE SETUP.
     //set noise properties.
     float n1_freq = 0.02;
@@ -116,13 +162,17 @@ float ofApp::noiseCoords(float _x, float _y, float _z){
 //--------------------------------------------------------------
 //RESTORE CAMERA COORDINATES.
 void ofApp::restoreCamera(){
-    cam.setPosition(0, 0, -100);
+    cam.setPosition(0, 0, -500);
     cam.lookAt(terrain);
 }
 
 //--------------------------------------------------------------
 //TOGGLE DRAW MODE.
 void ofApp::toggleDrawMode(){
+    //iterate state.
+    transition +=1;
+    result = transition % 3;
+    
     //transition state here.
     switch(result){
         case 0:
@@ -135,8 +185,11 @@ void ofApp::toggleDrawMode(){
             drawType = verticesOnly;
             break;
     }
-    transition +=1;
-    result = transition % 3;
+}
+
+//--------------------------------------------------------------
+void ofApp::exportMesh(){
+    savingMesh = true;
 }
 
 //--------------------------------------------------------------

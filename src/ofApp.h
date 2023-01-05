@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ofMain.h"
+//INCLUDE RELEVANT LIBRARIES.
 #include "ofxGui.h"
 
 class ofApp : public ofBaseApp{
@@ -26,29 +27,47 @@ class ofApp : public ofBaseApp{
     float noiseCoords(float _x, float _y, float _z);
     void restoreCamera();
     void toggleDrawMode();
+    void exportMesh();
 		
-    //CUSTOM VARIABLES.
+    //DECLARE PLANE
     ofPlanePrimitive terrain;
     ofMesh * terPtr;
-    ofEasyCam cam;
     
+    //CAMERA AND GUI --------------
+    
+    ofEasyCam cam;
     ofxPanel gui;
-    ofxFloatSlider amplitude;
+    
     ofxToggle iterateNoise;
     ofxIntSlider cols_rows;
     ofxFloatSlider size;
     ofxFloatSlider iterationSpeed;
     
+    //AMPLITUDES.
+    ofxFloatSlider amplitude;
     ofxFloatSlider waterHeight;
     ofxFloatSlider landHeight;
+    
+    //COLOURS.
+    ofxColorSlider waterCol;
+    ofxColorSlider landCol;
+    ofxColorSlider peakCol;
     
     //TOGGLES.
     ofxButton restoreCam;
     ofxButton drawMode;
+    ofxButton saveMesh;
+    bool savingMesh = false;
+    
+    //LIGHTS.
+    ofLight point1;
+    ofParameter <ofVec3f> lightPos;
+    
+    //----------------------------
     
     int frameNum;
     
-    //DECLARE STATE MACHINE
+    //DECLARE DRAW STATE MACHINE
     typedef enum {
     wireFrame,
     solidFill,
